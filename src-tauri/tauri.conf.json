@@ -12,9 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "laura",
-        "width": 800,
-        "height": 600
+        "title": "🦙 laura",
+        "width": 1300,
+        "height": 1000,
+        "transparent": true,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {

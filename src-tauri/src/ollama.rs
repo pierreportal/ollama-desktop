@@ -6,6 +6,8 @@ use tauri::Window;
 use tokio::sync::{watch, Mutex};
 use tokio_stream::StreamExt;
 
+const PROMPT_TAMPLATE: &str = "";
+
 #[derive(Default)]
 pub struct StreamControl {
     stop_sender: Option<watch::Sender<bool>>,
@@ -21,8 +23,10 @@ pub async fn ollama(
     let ollama = Ollama::default();
     let model = "deepseek-coder-v2".to_string();
 
+    let formatted_prompt = format!("{}{}", prompt, PROMPT_TAMPLATE);
+
     let mut stream = ollama
-        .generate_stream(GenerationRequest::new(model, &prompt))
+        .generate_stream(GenerationRequest::new(model, &formatted_prompt))
         .await
         .map_err(|e| e.to_string())?;
 

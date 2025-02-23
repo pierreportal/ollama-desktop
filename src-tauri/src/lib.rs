@@ -1,11 +1,8 @@
 use std::sync::Arc;
-use todos::TodoList;
 use tokio::sync::Mutex;
 
 mod ollama;
 use ollama::{ollama, stop_stream, StreamControl};
-
-mod todos;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
