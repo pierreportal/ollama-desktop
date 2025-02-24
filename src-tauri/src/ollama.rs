@@ -1,4 +1,5 @@
 use ollama_rs::generation::completion::request::GenerationRequest;
+use ollama_rs::models::LocalModel;
 use ollama_rs::Ollama;
 use std::sync::Arc;
 use tauri::Emitter;
@@ -53,6 +54,16 @@ pub async fn ollama(
     }
 
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_local_llms() -> Result<Vec<LocalModel>, String> {
+    let ollama = Ollama::default();
+    let models = ollama
+        .list_local_models()
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(models)
 }
 
 #[tauri::command]

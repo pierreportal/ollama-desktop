@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FormContainer } from "./styles";
-import { FiMessageCircle, FiAlertCircle } from "react-icons/fi";
+import { FiMessageCircle, FiStopCircle } from "react-icons/fi";
 import { Column } from "../../../../../UIKit";
 import { ChatItem } from "../../model/types";
 
@@ -34,7 +34,7 @@ export const Form = ({ onSubmit, onInterupt, isCompleting }: IProps) => {
       <Column gap={10}>
         {isCompleting ? (
           <button onClick={onInterupt}>
-            <FiAlertCircle />
+            <FiStopCircle />
           </button>
         ) : (
           <button type="submit">
