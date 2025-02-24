@@ -25,6 +25,7 @@ export const Dropdown = styled.button`
   width: 100%;
   border: none;
   cursor: pointer;
+  text-align: left;
 
   & > span {
     font-size: 12px;

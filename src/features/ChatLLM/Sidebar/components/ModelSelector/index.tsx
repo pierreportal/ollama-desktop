@@ -1,15 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
-import { FiCpu } from "react-icons/fi";
 import { DorpdownOptions, Dropdown, DropdownContainer } from "./styles";
+import { useChatContext } from "../../../context/hooks/useChatContext";
+import { LocalLLMs } from "../../../Chat/model/types";
 
 const GET_LOCAL_LLMS = "get_local_llms";
-
-type LocalLLMs = {
-  name: string;
-  size: number;
-  modified_at: string;
-};
 
 const parseModelName = (modelName: string) => {
   const [name, version] = modelName.split(":");
@@ -25,6 +20,8 @@ export const ModelSelector = () => {
   const [llms, setLLMs] = useState<Array<LocalLLMs>>([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
+  const { selectedModel, setSelectedModel } = useChatContext();
+
   const getLocalLLMs = async () => {
     const models: Array<LocalLLMs> | string = await invoke(GET_LOCAL_LLMS);
     setIsLoading(false);
@@ -32,11 +29,14 @@ export const ModelSelector = () => {
       console.error(models);
       return;
     }
+    if (!selectedModel) {
+      setSelectedModel(models[0]);
+    }
     setLLMs(models);
   };
 
-  const handleSelect = (selection: string) => {
-    console.log(selection); // TODO: add in context
+  const handleSelect = (selection: LocalLLMs) => {
+    setSelectedModel(selection);
     setIsCollapsed(true);
   };
 
@@ -52,7 +52,7 @@ export const ModelSelector = () => {
         disabled={isLoading || !llms.length}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        {parseModelName(llms[0]?.name)}
+        {selectedModel ? parseModelName(selectedModel.name) : "Loading..."}
       </Dropdown>
 
       <DorpdownOptions isCollapsed={isCollapsed}>
@@ -61,7 +61,7 @@ export const ModelSelector = () => {
             <li
               key={llm.name}
               value={llm.name}
-              onClick={() => handleSelect(llm.name)}
+              onClick={() => handleSelect(llm)}
             >
               {parseModelName(llm.name)}
             </li>

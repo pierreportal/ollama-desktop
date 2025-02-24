@@ -17,12 +17,12 @@ pub struct StreamControl {
 pub async fn ollama(
     window: Window,
     prompt: String,
+    model: String,
     state: tauri::State<'_, Arc<Mutex<StreamControl>>>,
 ) -> Result<(), String> {
     println!("Generating tokens...{}", prompt);
 
     let ollama = Ollama::default();
-    let model = "deepseek-coder-v2".to_string();
 
     let formatted_prompt = format!("{}{}", prompt, PROMPT_TAMPLATE);
 
