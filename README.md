@@ -66,8 +66,6 @@ ollama list
 
 ## Building the App
 
-To build the Tauri app for production:
-
 ```sh
 npm tauri build
 ```
