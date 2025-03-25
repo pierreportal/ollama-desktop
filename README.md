@@ -12,8 +12,7 @@ A lightweight and privacy-focused ChatGPT clone built with [Tauri](https://tauri
 
 ## Screenshots
 
-[TODO]
-_(Add screenshots here)_
+![Screenshot 2025-03-25 at 14 12 25](https://github.com/user-attachments/assets/13f02922-57ae-4e62-9370-dd6f197cd659)
 
 ## Installation
 
