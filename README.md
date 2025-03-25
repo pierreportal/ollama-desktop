@@ -72,16 +72,15 @@ To build the Tauri app for production:
 npm tauri build
 ```
 
-## Contributing
+## Next steps
 
-[TODO]
+- Chat history context
+- Chats memory
+- Document vectorisation
+- Knowledge base
 
 ## License
 
 This project is licensed under the MIT License.
 
 ---
-
-### Future Enhancements
-
-[TODO]
