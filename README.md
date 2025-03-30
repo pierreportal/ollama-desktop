@@ -27,8 +27,8 @@ Ensure you have the following installed:
 ### Clone the Repository
 
 ```sh
-git clone https://github.com/pierreportal/ollama-desktop.git
-cd ollama-desktop
+git clone https://github.com/pierreportal/ollamaDesktop.git
+cd ollamaDesktop
 ```
 
 ### Install Dependencies
