@@ -17,7 +17,7 @@ export const useStreamListener = () => {
 
   useEffect(() => {
     const unlisten = listen<any>(OLLAMA_TOKEN, (event) => {
-      console.log(event.payload);
+      setEndOfStream(false);
       setOllamaCompletion((prev: string) => prev + event.payload[0].response);
       if (event.payload[0].done) {
         setOllamaCompletion("");

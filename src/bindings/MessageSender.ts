@@ -1,4 +1,4 @@
-const MESSAGE_SENDER = {
+export const MESSAGE_SENDER = {
     User: 'User',
     Ollama: 'Ollama',
 } as const;

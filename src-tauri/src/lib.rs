@@ -23,8 +23,10 @@ pub async fn run() -> Result<()> {
         .manage(Arc::new(Mutex::new(StreamControl::default())))
         .invoke_handler(tauri::generate_handler![
             ollama::ask_ollama,
+            ollama::summarise_chat,
             ollama::stop_stream,
             ollama::get_local_llms,
+            ollama::give_title_to_chat,
             ipc::get_chat,
             ipc::create_chat,
             ipc::update_chat,

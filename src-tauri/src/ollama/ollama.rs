@@ -1,3 +1,4 @@
+use ollama_rs::error::OllamaError;
 use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::generation::completion::GenerationResponse;
 use ollama_rs::models::LocalModel;
@@ -9,6 +10,8 @@ use tokio::sync::{watch, Mutex};
 use tokio_stream::StreamExt;
 
 const PROMPT_TAMPLATE: &str = "";
+const SUMMARY_TAMPLATE: &str = "In only 3 lines, tell me what this chat is about: \n";
+const TITLE_TAMPLATE: &str = "In only 3 words, Find a useful title for this chat: \n";
 
 #[derive(Default)]
 pub struct StreamControl {
@@ -37,6 +40,30 @@ impl OllamaController {
         Ok(())
     }
 
+    pub async fn give_title_to_chat(model: String, prompt: String) -> Result<String, String> {
+        let ollama = Ollama::default();
+        let formatted_prompt = format!("{}{}", TITLE_TAMPLATE, prompt);
+        let res = ollama
+            .generate(GenerationRequest::new(model, formatted_prompt))
+            .await
+            .map_err(|e| e.to_string())?;
+
+        println!("Title for chat: {:?}", res.response); //TODO: remove after testing
+        Ok(res.response)
+    }
+
+    pub async fn summarise_chat(model: String, prompt: String) -> Result<String, String> {
+        let ollama = Ollama::default();
+        let formatted_prompt = format!("{}{}", SUMMARY_TAMPLATE, prompt);
+        let res = ollama
+            .generate(GenerationRequest::new(model, formatted_prompt))
+            .await
+            .map_err(|e| e.to_string())?;
+
+        println!("Summarised chat: {:?}", res.response); //TODO: remove after testing
+        Ok(res.response)
+    }
+
     pub async fn ask_ollama(
         window: Window,
         prompt: String,
@@ -47,7 +74,7 @@ impl OllamaController {
 
         let formatted_prompt = format!("{}{}", prompt, PROMPT_TAMPLATE);
 
-        println!("Prompt: {}", prompt); //TODO: remove after testing
+        // println!("Prompt: {}", prompt); //TODO: remove after testing
 
         let mut stream = ollama
             .generate_stream(GenerationRequest::new(model, &formatted_prompt))
@@ -64,7 +91,6 @@ impl OllamaController {
 
         while let Some(token_result) = stream.next().await {
             if *rx.borrow() {
-                println!("Stream interrupted."); //TODO: remove after testing
                 break;
             }
 
@@ -79,7 +105,7 @@ impl OllamaController {
             }
         }
 
-        println!("OllaMa response: {}", ollama_response); //TODO: remove after testing
+        // println!("OllaMa response: {}", ollama_response); //TODO: remove after testing
         Ok(())
     }
 }

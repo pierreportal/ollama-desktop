@@ -1,1 +1,4 @@
-export interface Page { limit: number, page: number, }
+export interface Page {
+    limit: number,
+    page: number,
+}

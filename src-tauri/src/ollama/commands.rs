@@ -1,4 +1,6 @@
 use super::{OllamaController, StreamControl};
+use ollama_rs::error::OllamaError;
+use ollama_rs::generation::completion::GenerationResponse;
 use ollama_rs::models::LocalModel;
 use ollama_rs::Ollama;
 use std::sync::Arc;
@@ -23,4 +25,14 @@ pub async fn get_local_llms() -> Result<Vec<LocalModel>, String> {
 #[tauri::command]
 pub async fn stop_stream(state: tauri::State<'_, Arc<Mutex<StreamControl>>>) -> Result<(), String> {
     OllamaController::stop_stream(state).await
+}
+
+#[tauri::command]
+pub async fn summarise_chat(model: String, prompt: String) -> Result<String, String> {
+    OllamaController::summarise_chat(model, prompt).await
+}
+
+#[tauri::command]
+pub async fn give_title_to_chat(model: String, prompt: String) -> Result<String, String> {
+    OllamaController::give_title_to_chat(model, prompt).await
 }

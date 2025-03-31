@@ -1,7 +1,4 @@
-export type ChatItem = {
-  text: string;
-  isUser: boolean;
-};
+import { Message } from "../../../../bindings";
 
 export type LocalLLMs = {
   name: string;
@@ -9,4 +6,4 @@ export type LocalLLMs = {
   modified_at: string;
 };
 
-export type OllamaChat = Array<ChatItem>;
+export type OllamaChat = Array<Message>;

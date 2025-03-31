@@ -26,15 +26,12 @@ serde_with_macros = "3"
 ollama-rs = { version = "0.2.5", features = ["stream"] }
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1.17"
-# For dev and easy to go first experience, we set up an in-memory surrealdb for now.
-# Remove `default-features=false, features = ...` to enable persistent storage.
+ts-rs = { version = "7" }
 surrealdb = { version = "1.0.0", default-features = false, features = [
     "kv-mem",
-    "kv-rocksdb",
+    # "kv-rocksdb",
 ] }
 # surrealdb = "1.0.0"
-
-ts-rs = { version = "7" }
 
 [dev-dependencies]
 anyhow = "1"

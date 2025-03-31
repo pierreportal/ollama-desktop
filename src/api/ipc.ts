@@ -6,6 +6,7 @@ export async function ipc_invoke(
 ): Promise<any> {
   const response: any = await invoke(method, { params });
   if (response.error != null) {
+    console.error(response.error);
     throw new Error(response.error);
   } else {
     return deepFreeze(response.result);

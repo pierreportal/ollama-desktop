@@ -20,10 +20,8 @@ pub enum MessageSender {
 #[derive(Debug, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "../src/bindings/")]
 pub struct Message {
-    pub id: String,
     pub from: MessageSender,
     pub content: String,
-    pub timestamp: u64,
 }
 
 #[cfg_attr(test, derive(PartialEq,))]
@@ -33,17 +31,16 @@ pub struct Chat {
     pub id: String,
     pub messages: Vec<Message>,
     // summary is used for keeping track of context
-    pub summary: String,
+    pub summary: Option<String>,
     pub title: String,
 }
 
-// TODO: Check if this is needed and what it is used for
 #[cfg_attr(test, derive(Clone))]
 #[derive(Debug, Deserialize)]
 pub struct ChatMapping {
     pub id: IdWrapper,
     pub messages: Vec<Message>,
-    pub summary: String,
+    pub summary: Option<String>,
     pub title: String,
 }
 
@@ -63,14 +60,13 @@ impl TryFrom<ChatMapping> for Chat {
         Ok(task)
     }
 }
-// ------------------------------------------------
 
 #[skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize, TS)]
 #[ts(export, export_to = "../src/bindings/")]
 pub struct ChatCreation {
     pub messages: Vec<Message>,
-    pub summary: String,
+    pub summary: Option<String>,
     pub title: String,
 }
 
@@ -83,6 +79,14 @@ pub struct ChatUpdate {
     pub messages: Option<Vec<Message>>,
     pub summary: Option<String>,
     pub title: Option<String>,
+}
+
+#[skip_serializing_none]
+#[derive(Debug, Deserialize, Serialize, TS)]
+#[ts(export, export_to = "../src/bindings/")]
+pub struct ChatListItem {
+    pub id: String,
+    pub title: String,
 }
 
 impl Patchable for ChatUpdate {}
@@ -127,11 +131,21 @@ impl ChatController {
             .get_full_id())
     }
 
-    pub async fn list(store: Arc<Store>, page: Option<Page>) -> Result<Vec<Chat>> {
+    pub async fn list(store: Arc<Store>, page: Option<Page>) -> Result<Vec<ChatListItem>> {
         let res = store
             .get()
             .exec_list::<ChatMapping>(Self::ENTITY, page)
             .await?;
-        res.into_iter().map(|o| o.try_into()).collect::<Result<_>>()
+
+        println!("{:?}", res);
+        res.into_iter()
+            .map(|o| {
+                let chat: Chat = o.try_into()?;
+                Ok(ChatListItem {
+                    id: chat.id,
+                    title: chat.title, // Replace with the correct field
+                })
+            })
+            .collect::<Result<_>>()
     }
 }

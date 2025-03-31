@@ -2,7 +2,7 @@ use super::types::{Page, Record};
 use crate::{Error, Result};
 
 use serde::{de::DeserializeOwned, Serialize};
-use surrealdb::engine::local::RocksDb;
+// use surrealdb::engine::local::RocksDb;
 use surrealdb::engine::local::{Db, Mem};
 use surrealdb::opt::auth::Root;
 
@@ -19,8 +19,8 @@ pub trait Patchable: Serialize {}
 impl SurrealStore {
     pub(in crate::model) async fn new() -> Result<Self> {
         // Create database connection
-        // let db = Surreal::new::<Mem>(()).await?;
-        let db = Surreal::new::<RocksDb>("../.db").await?;
+        let db = Surreal::new::<Mem>(()).await?;
+        // let db = Surreal::new::<RocksDb>("../.db").await?;
 
         // Select a specific namespace / database
         db.use_ns("test").use_db("test").await?;
