@@ -4,44 +4,66 @@ import { useEffect, useState } from "react";
 import { ChatStream } from "./components/ChatStream";
 import { Main } from "./styles";
 import { Column } from "../../../UIKit";
-import { invoke } from "@tauri-apps/api/core";
-import { ChatItem, OllamaChat } from "./model/types";
 import { useChatContext } from "../context/hooks/useChatContext";
-
-const OLLAMA = "ollama";
+import { Message, MESSAGE_SENDER } from "../../../bindings";
+import { useChatApi } from "./hooks/useChatApi";
+import { useOllama } from "./hooks/useOllama";
 
 export const Chat = () => {
-  const [stream, setStream] = useState<OllamaChat>([]);
-  const { selectedModel } = useChatContext();
+  const { getChat, upsertChat, updateChat } = useChatApi();
+  const { currentChatId } = useChatContext();
+  const { ollamaCompletion, stopStreaming, endOfStream } = useStreamListener();
+  const { askOllama, giveTitleToChat } = useOllama();
+  const [stream, setStream] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const askLaura = async (prompt: string) => {
-    setIsLoading(true);
-    await invoke(OLLAMA, { prompt, model: selectedModel?.name.split(":")[0] });
+  useEffect(() => {
+    const fetchChat = async () => {
+      const chat = await getChat(currentChatId!);
+      if (chat) {
+        setStream(chat.messages);
+      }
+    }
+    if (currentChatId) {
+      fetchChat();
+    }
+  }, []);
+
+  const summarise = async () => {
+    const title = await giveTitleToChat(stream.slice(-4));
+    if (title) {
+      updateChat({ title });
+    }
   };
-
-  const handleSendMessage = (message: ChatItem) => {
-    setStream((prev) => [...prev, message, { text: "", isUser: false }]);
-    askLaura(message.text);
-  };
-
-  const { ollamaCompletion, stopStreaming } = useStreamListener();
 
   useEffect(() => {
     if (ollamaCompletion) {
-      const b = stream.pop();
-      if (b) {
-        b.text = ollamaCompletion;
-        setStream((prev) => [...prev, b]);
+      const ollamaMessage = stream.pop();
+      if (ollamaMessage) {
+        ollamaMessage.content = ollamaCompletion;
+        setStream((prev) => [...prev, ollamaMessage]);
       }
       setIsLoading(false);
     }
-  }, [ollamaCompletion]);
+    if (endOfStream) {
+      upsertChat(stream);
+      if (stream.length % 4 === 0) {
+        summarise();
+      }
+    }
+  }, [ollamaCompletion, endOfStream]);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const handleSendMessage = (message: Message) => {
+    setIsLoading(true);
+    setStream((prev) => [...prev, message, { content: "", from: MESSAGE_SENDER.Ollama }]);
+    upsertChat([...stream, message]);
+    askOllama(message);
+  };
 
   return (
     <Main>
-      <Column gap={10} reverse style={{ alignItems: "center" }}>
+      <Column gap={10} reverse={true} style={{ alignItems: "center" }}>
+        {currentChatId}
         <Form
           onSubmit={handleSendMessage}
           onInterupt={stopStreaming}

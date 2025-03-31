@@ -29,7 +29,7 @@ export const Sidebar = () => {
 
   return (
     <>
-      <StyledSidebar isCollapsed={isCollapsed}>
+      <StyledSidebar is_collapsed={isCollapsed}>
         {collapseButton}
         <Column gap={20}>
           <ModelSelector />

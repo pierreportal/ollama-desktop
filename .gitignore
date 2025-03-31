@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+data/
+.db
+
+surrealdb.db/
+
+.env

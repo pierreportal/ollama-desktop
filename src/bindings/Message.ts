@@ -1,8 +1,7 @@
 import type { MessageSender } from './MessageSender';
 
 export interface Message {
-    id: string;
-    from: MessageSender;
+    sender: MessageSender;
     content: string;
-    timestamp: number;
+    timestamp: string;
 }

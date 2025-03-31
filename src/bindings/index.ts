@@ -4,3 +4,4 @@ export * from './Page';
 export * from './ChatCreation';
 export * from './ChatUpdate';
 export * from './MessageSender';
+export * from './ChatListItem';

@@ -1,38 +1,38 @@
-// While exploring, remove for prod.
-#![allow(unused)]
-pub use error::{Error, Result};
-pub use model::Store;
-use ollama::StreamControl;
+use tauri::Manager;
+mod error;
+mod ollama;
+
+// pub use error::Result;
+use ollama::{OllamaController, StreamControl};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-mod error;
-mod ipc;
-mod model;
-mod ollama;
+mod controllers;
+use controllers::chat_controller::Database;
 
-#[tokio::main]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub async fn run() -> Result<()> {
-    let store = Store::new().await?;
-    let store = Arc::new(store);
-
+pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(store)
+        .setup(|app| {
+            let app_handle = app.handle();
+            tauri::async_runtime::block_on(async move {
+                let db = Database::new()
+                    .await
+                    .expect("Failed to initialize database");
+                app_handle.manage(db);
+            });
+            Ok(())
+        })
         .manage(Arc::new(Mutex::new(StreamControl::default())))
+        .manage(OllamaController::new())
         .invoke_handler(tauri::generate_handler![
             ollama::ask_ollama,
+            ollama::summarise_chat,
             ollama::stop_stream,
             ollama::get_local_llms,
-            ipc::get_chat,
-            ipc::create_chat,
-            ipc::update_chat,
-            ipc::delete_chat,
-            ipc::list_chats,
+            ollama::give_title_to_chat,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Tauri application");
-
-    Ok(())
 }

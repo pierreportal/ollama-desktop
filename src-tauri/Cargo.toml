@@ -24,17 +24,11 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_with_macros = "3"
 ollama-rs = { version = "0.2.5", features = ["stream"] }
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1.44.1", features = ["macros", "rt-multi-thread"] }
 tokio-stream = "0.1.17"
-# For dev and easy to go first experience, we set up an in-memory surrealdb for now.
-# Remove `default-features=false, features = ...` to enable persistent storage.
-surrealdb = { version = "1.0.0", default-features = false, features = [
-    "kv-mem",
-    "kv-rocksdb",
-] }
-# surrealdb = "1.0.0"
-
 ts-rs = { version = "7" }
+surrealdb = { version = "2.2.1", features = ["kv-mem", "kv-rocksdb"] }
+uuid = { version = "1.0", features = ["v4"] }
 
 [dev-dependencies]
 anyhow = "1"
@@ -44,3 +38,10 @@ anyhow = "1"
 # If you use cargo directly instead of tauri's cli you can use this feature flag to switch between tauri's `dev` and `build` modes.
 # DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 3
+panic = 'abort'
+codegen-units = 1

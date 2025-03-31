@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 interface StyledSidebarProps {
-  isCollapsed: boolean;
+  is_collapsed: boolean;
 }
 
 export const StyledSidebar = styled.div<StyledSidebarProps>`
@@ -14,13 +14,13 @@ export const StyledSidebar = styled.div<StyledSidebarProps>`
   height: 100vh;
   background-color: #222;
   transition: transform 0.3s;
-  transform: ${({ isCollapsed }) =>
-    isCollapsed ? "translateX(-100%)" : "translateX(0)"};
+  transform: ${({ is_collapsed }) =>
+    is_collapsed ? "translateX(-100%)" : "translateX(0)"};
 
   & > button {
     margin-bottom: 20px;
     transform: translateX(
-      ${({ isCollapsed }) => (isCollapsed ? "250px" : "0")}
+      ${({ is_collapsed }) => (is_collapsed ? "250px" : "0")}
     );
     transition: transform 0.3s;
     background: transparent;
@@ -31,4 +31,9 @@ export const StyledSidebar = styled.div<StyledSidebarProps>`
     align-items: center;
     border: none;
   }
+`;
+
+export const SidebarHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;

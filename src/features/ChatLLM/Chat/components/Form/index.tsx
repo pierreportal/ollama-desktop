@@ -2,10 +2,10 @@ import { useState } from "react";
 import { FormContainer } from "./styles";
 import { FiMessageCircle, FiStopCircle } from "react-icons/fi";
 import { Column } from "../../../../../UIKit";
-import { ChatItem } from "../../model/types";
+import { Message, MESSAGE_SENDER } from "../../../../../bindings";
 
 interface IProps {
-  onSubmit: (prompt: ChatItem) => void;
+  onSubmit: (prompt: Message) => void;
   onInterupt: () => void;
   isCompleting: boolean;
 }
@@ -17,7 +17,7 @@ export const Form = ({ onSubmit, onInterupt, isCompleting }: IProps) => {
     e.preventDefault();
     if (!prompt.trim().length) return;
     setPrompt("");
-    onSubmit({ text: prompt, isUser: true });
+    onSubmit({ content: prompt, from: MESSAGE_SENDER.User });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
