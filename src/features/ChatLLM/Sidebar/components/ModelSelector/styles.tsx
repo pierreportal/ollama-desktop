@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 interface StyledSidebarProps {
-  isCollapsed: boolean;
+  $isCollapsed: boolean;
 }
 
 export const DropdownContainer = styled.div`
@@ -39,17 +39,23 @@ export const Dropdown = styled.button`
 
 export const DorpdownOptions = styled.div<StyledSidebarProps>`
   background-color: #333;
-  border-radius: 0 0 5px 5px;
-  border-top: 1px solid #555;
+  border-radius: 5px;
+  border-top: 2px solid #222;
   padding: 0;
+  max-height: 200px;
+  overflow: scroll;
 
   & ul {
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     list-style: none;
     padding: 0;
+    margin: 0;
 
     & li {
+      text-wrap: nowrap;
+      text-overflow: elipsis;
       cursor: pointer;
       font-size: 16px;
       padding: 5px 8px;
@@ -70,7 +76,7 @@ export const DorpdownOptions = styled.div<StyledSidebarProps>`
     }
   }
 
-  display: ${({ isCollapsed }) => (isCollapsed ? "none" : "block")};
+  display: ${({ $isCollapsed }) => ($isCollapsed ? "none" : "block")};
   position: absolute;
   width: 100%;
   z-index: 1;

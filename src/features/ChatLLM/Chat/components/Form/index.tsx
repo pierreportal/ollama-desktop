@@ -31,7 +31,7 @@ export const Form = ({ onSubmit, onInterupt, isCompleting }: IProps) => {
         onChange={handleChange}
         placeholder="Ask me something..."
       />
-      <Column gap={10}>
+      <Column $gap={10}>
         {isCompleting ? (
           <button onClick={onInterupt}>
             <FiStopCircle />

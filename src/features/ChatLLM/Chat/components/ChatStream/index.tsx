@@ -20,7 +20,7 @@ export const ChatStream = ({ stream, isLoading }: IProps) => {
     .filter((x) => x.content)
     .map((item, index) => {
       return item.from === MESSAGE_SENDER.USER ? (
-        <Bubble key={index} isUser>
+        <Bubble key={index} $isUser>
           <p>{item.content}</p>
         </Bubble>
       ) : (
@@ -53,7 +53,7 @@ export const ChatStream = ({ stream, isLoading }: IProps) => {
               {item.content}
             </Markdown>
           </div>
-          <Row gap={10}>
+          <Row $gap={10}>
             {/* TODO: implement copy to clipboard */}
             <FiCopy />
             {/* TODO: implement refresh query */}

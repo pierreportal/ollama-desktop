@@ -60,7 +60,7 @@ export const ModelSelector = () => {
         {selectedModel ? parseModelName(selectedModel.name) : "Loading..."}
       </Dropdown>
 
-      <DorpdownOptions isCollapsed={isCollapsed}>
+      <DorpdownOptions $isCollapsed={isCollapsed}>
         <ul>
           {llms.map((llm) => (
             <li

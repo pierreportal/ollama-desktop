@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { FiEdit } from "react-icons/fi";
 import { ChatListItem } from "./components/ChatListItem";
-import { NewChatButton } from "./styles";
+import { ChatUList, NewChatButton } from "./styles";
 import { SidebarHeader } from "../../styles";
 import { useChatContext } from "../../../context/hooks/useChatContext";
 import { invokeOllama } from "../../../Chat/utils/invokeOllama";
@@ -12,8 +12,9 @@ export type ChatListItem = {
 };
 
 export const ChatList = () => {
-  const { setCurrentChatId, chatsList, setChatsList } = useChatContext();
   const { getChats } = invokeOllama;
+  const { setCurrentChatId, chatsList, setChatsList, currentChatId } =
+    useChatContext();
 
   useEffect(() => {
     const listChats = async () => {
@@ -21,7 +22,7 @@ export const ChatList = () => {
       setChatsList(chats as ChatListItem[]);
     };
     listChats();
-  }, []);
+  }, [currentChatId]);
 
   return (
     <div>
@@ -31,11 +32,15 @@ export const ChatList = () => {
           <FiEdit size={16} />
         </NewChatButton>
       </SidebarHeader>
-      <ul>
+      <ChatUList>
         {chatsList.map((chat: any) => (
-          <ChatListItem key={chat.id} chat={chat} />
+          <ChatListItem
+            key={chat.id}
+            chat={chat}
+            isSelected={chat.id === currentChatId}
+          />
         ))}
-      </ul>
+      </ChatUList>
     </div>
   );
 };

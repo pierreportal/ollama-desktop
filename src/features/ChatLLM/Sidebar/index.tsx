@@ -29,9 +29,9 @@ export const Sidebar = () => {
 
   return (
     <>
-      <StyledSidebar is_collapsed={isCollapsed}>
+      <StyledSidebar $is_collapsed={isCollapsed}>
         {collapseButton}
-        <Column gap={20}>
+        <Column $gap={20}>
           <ModelSelector />
           <ChatList />
         </Column>

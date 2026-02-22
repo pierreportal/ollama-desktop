@@ -8,7 +8,8 @@ import { invokeOllama } from "./utils/invokeOllama";
 import { useChatStream } from "./hooks/useChatStream";
 
 export const Chat = () => {
-  const { currentChatId, setSelectedModel } = useChatContext();
+  const { currentChatId, setCurrentChatId, setSelectedModel } =
+    useChatContext();
   const { askOllama, getChatById, selectModel } = invokeOllama;
   const {
     isLoading,
@@ -35,23 +36,25 @@ export const Chat = () => {
     }
   }, [currentChatId]);
 
-  const handleSendMessage = (message: Message) => {
+  const handleSendMessage = async (prompt: Message) => {
     setIsLoading(true);
     setStream((prev) => [
       ...prev,
-      message,
+      prompt,
       {
         content: "",
         from: MESSAGE_SENDER.MODEL,
       },
     ]);
-    askOllama(message);
+    const chat = await askOllama(currentChatId, prompt);
+    if (chat && chat.id !== currentChatId) {
+      setCurrentChatId(chat.id);
+    }
   };
 
   return (
     <Main>
-      <ThreadColumn gap={10} reverse={true}>
-        {currentChatId}
+      <ThreadColumn $gap={10} $reverse={true}>
         <Form
           onSubmit={handleSendMessage}
           onInterupt={stopStreaming}

@@ -1,3 +1,4 @@
+import { LocalLLM } from "./LocalLLM";
 import type { Message } from "./Message";
 
 export interface Chat {
@@ -5,4 +6,5 @@ export interface Chat {
   thread: Message[];
   summary: string;
   title: string;
+  model: LocalLLM;
 }
