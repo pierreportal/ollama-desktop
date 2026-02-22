@@ -18,7 +18,6 @@ pub struct StreamControl {
 pub struct OllamaController {
     pub ollama: Ollama,
     pub selected_model: Mutex<Option<LocalModel>>,
-    pub current_conversation_id: Mutex<Option<String>>,
 }
 
 impl OllamaController {
@@ -26,7 +25,6 @@ impl OllamaController {
         Self {
             ollama: Ollama::default(),
             selected_model: Mutex::new(None),
-            current_conversation_id: Mutex::new(None),
         }
     }
 
@@ -43,23 +41,6 @@ impl OllamaController {
         self.selected_model
             .lock()
             .map_err(|_| "selected_model mutex poisoned".to_string())
-            .unwrap()
-            .clone()
-    }
-
-    pub fn set_current_conversation_id(&self, id: String) -> Result<(), String> {
-        let mut current_conversation_id = self
-            .current_conversation_id
-            .lock()
-            .map_err(|_| "current_conversation_id mutex poisoned".to_string())?;
-        *current_conversation_id = Some(id);
-        Ok(())
-    }
-
-    pub fn get_current_conversation_id(&self) -> Option<String> {
-        self.current_conversation_id
-            .lock()
-            .map_err(|_| "current_conversation_id mutex poisoned".to_string())
             .unwrap()
             .clone()
     }

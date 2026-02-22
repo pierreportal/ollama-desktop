@@ -1,4 +1,4 @@
-use crate::models::chat::{Chat, ChatListItem, ChatMessage, ChatRecord, Record};
+use crate::models::chat::{Chat, ChatListItem, ChatMessage, ChatRecord};
 use ollama_rs::models::LocalModel;
 use std::sync::Arc;
 use surrealdb::engine::local::{Db, RocksDb};
@@ -23,7 +23,7 @@ impl Database {
         &self,
         model: LocalModel,
         thread: Vec<ChatMessage>,
-    ) -> Result<Option<Record>, surrealdb::Error> {
+    ) -> Result<Option<ChatRecord>, surrealdb::Error> {
         let new_chat = Chat::new(
             format!("{}: new chat", model.name).to_string(),
             model,
@@ -43,7 +43,7 @@ impl Database {
         &self,
         id: String,
         thread: Vec<ChatMessage>,
-    ) -> Result<Option<Record>, surrealdb::Error> {
+    ) -> Result<Option<ChatRecord>, surrealdb::Error> {
         let updated = {
             let db = self.db.lock().await;
             let result = db
@@ -85,7 +85,7 @@ impl Database {
     }
 
     pub async fn get_chats(&self) -> Result<Vec<ChatListItem>, surrealdb::Error> {
-        let chats = {
+        let chat_items = {
             let db = self.db.lock().await;
             db.query("BEGIN TRANSACTION").await?;
             let result: Vec<ChatRecord> = db.query("SELECT * FROM chat").await?.take(0)?;
@@ -99,7 +99,7 @@ impl Database {
                 })
                 .collect()
         };
-        Ok(chats)
+        Ok(chat_items)
     }
 
     // pub async fn delete_chat_by_id(&self, id: String) -> Result<(), surrealdb::Error> {
