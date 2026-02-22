@@ -1,19 +1,17 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { LocalLLMs } from "../../Chat/model/types";
-// import { Chat } from "../../../../bindings";
+import { LocalLLM } from "../../../../bindings";
 
 export interface IChatContext {
-  selectedModel: LocalLLMs | null;
-  setSelectedModel: (model: LocalLLMs) => void;
+  selectedModel: LocalLLM | null;
+  setSelectedModel: (model: LocalLLM) => void;
   currentChatId: string | null;
-  setCurrentChatId: (chatId: string) => void;
-  chatsList: { id: string, title: string }[];
-  setChatsList: Dispatch<SetStateAction<{ id: string; title: string; }[]>>;
-  createNewChat: (newChat: { id: string, title: string }) => void;
+  setCurrentChatId: (chatId: string | null) => void;
+  chatsList: { id: string; title: string }[];
+  setChatsList: Dispatch<SetStateAction<{ id: string; title: string }[]>>;
 }
 
 export const ChatContext = React.createContext<IChatContext | undefined>(
-  undefined
+  undefined,
 );
 
 export const useChatContext = () => {

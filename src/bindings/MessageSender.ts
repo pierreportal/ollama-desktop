@@ -1,7 +1,7 @@
 export const MESSAGE_SENDER = {
-    User: 'User',
-    Ollama: 'Ollama',
+  USER: "user",
+  MODEL: "model",
 } as const;
 
-export type MessageSender = typeof MESSAGE_SENDER[keyof typeof MESSAGE_SENDER];
-
+export type MessageSender =
+  (typeof MESSAGE_SENDER)[keyof typeof MESSAGE_SENDER];

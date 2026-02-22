@@ -1,10 +1,8 @@
-import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 import { DorpdownOptions, Dropdown, DropdownContainer } from "./styles";
 import { useChatContext } from "../../../context/hooks/useChatContext";
-import { LocalLLMs } from "../../../Chat/model/types";
-
-const GET_LOCAL_LLMS = "get_local_llms";
+import { LocalLLM } from "../../../../../bindings";
+import { invokeOllama } from "../../../Chat/utils/invokeOllama";
 
 const parseModelName = (modelName: string) => {
   const [name, version] = modelName.split(":");
@@ -17,13 +15,15 @@ const parseModelName = (modelName: string) => {
 
 export const ModelSelector = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [llms, setLLMs] = useState<Array<LocalLLMs>>([]);
+  const [llms, setLLMs] = useState<Array<LocalLLM>>([]);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const { selectModel, getLocalLLMs } = invokeOllama;
 
-  const { selectedModel, setSelectedModel } = useChatContext();
+  const { selectedModel, setSelectedModel, setCurrentChatId } =
+    useChatContext();
 
-  const getLocalLLMs = async () => {
-    const models: Array<LocalLLMs> | string = await invoke(GET_LOCAL_LLMS);
+  const getLocalModels = async () => {
+    const models = (await getLocalLLMs()) as LocalLLM[];
     setIsLoading(false);
     if (typeof models === "string") {
       console.error(models);
@@ -31,17 +31,22 @@ export const ModelSelector = () => {
     }
     if (!selectedModel) {
       setSelectedModel(models[0]);
+      selectModel(models[0]);
     }
     setLLMs(models);
   };
 
-  const handleSelect = (selection: LocalLLMs) => {
-    setSelectedModel(selection);
+  const handleSelect = async (selection: LocalLLM) => {
+    if (selectedModel?.name !== selection.name) {
+      setSelectedModel(selection);
+      selectModel(selection);
+      setCurrentChatId(null);
+    }
     setIsCollapsed(true);
   };
 
   useEffect(() => {
-    getLocalLLMs();
+    getLocalModels();
   }, []);
 
   return (

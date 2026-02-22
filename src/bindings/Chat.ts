@@ -1,8 +1,8 @@
-import type { Message } from './Message';
+import type { Message } from "./Message";
 
 export interface Chat {
-    id: string;
-    messages: Message[];
-    summary: string;
-    title: string;
+  id: string;
+  thread: Message[];
+  summary: string;
+  title: string;
 }

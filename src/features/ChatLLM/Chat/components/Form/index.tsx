@@ -17,7 +17,7 @@ export const Form = ({ onSubmit, onInterupt, isCompleting }: IProps) => {
     e.preventDefault();
     if (!prompt.trim().length) return;
     setPrompt("");
-    onSubmit({ content: prompt, from: MESSAGE_SENDER.User });
+    onSubmit({ content: prompt, from: MESSAGE_SENDER.USER });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

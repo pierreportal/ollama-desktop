@@ -1,6 +1,6 @@
-import { Message } from "../../../../bindings";
+import { Message } from "./";
 
-export type LocalLLMs = {
+export type LocalLLM = {
   name: string;
   size: number;
   modified_at: string;

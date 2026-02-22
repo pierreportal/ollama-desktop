@@ -1,10 +1,10 @@
-// use surrealdb::opt::PatchOp;
+use crate::models::chat::{Chat, ChatListItem, ChatMessage, ChatRecord, Record};
+use ollama_rs::models::LocalModel;
 use std::sync::Arc;
+use surrealdb::engine::local::{Db, RocksDb};
+use surrealdb::opt::PatchOp;
 use surrealdb::Surreal;
 use tokio::sync::Mutex;
-use surrealdb::engine::local::{Db, RocksDb};
-
-// use crate::models::note::{Note, Record, NoteRecord};
 
 pub struct Database {
     db: Arc<Mutex<Surreal<Db>>>,
@@ -13,89 +13,101 @@ pub struct Database {
 impl Database {
     pub async fn new() -> Result<Self, surrealdb::Error> {
         let db = Surreal::new::<RocksDb>("../surrealdb.db").await?;
-        // Initialize database
-        db.use_ns("test").use_db("test").await?;
+        db.use_ns("ollama-desktop").use_db("conv").await?;
         Ok(Self {
             db: Arc::new(Mutex::new(db)),
         })
     }
 
-    // pub async fn create_note(
-    //     &self,
-    //     title: String,
-    //     content: String
-    // ) -> Result<Option<Record>, surrealdb::Error> {
-    //     let created = {
-    //         let db = self.db.lock().await;
-    //         let result = db.create("note").content(Note {
-    //             title,
-    //             content
-    //         }).await?;
-    //         db.query("COMMIT TRANSACTION").await?;
-    //         result
-    //     };
-    //     Ok(created)
-    // }
+    pub async fn create_chat(
+        &self,
+        model: LocalModel,
+        thread: Vec<ChatMessage>,
+    ) -> Result<Option<Record>, surrealdb::Error> {
+        let new_chat = Chat::new(
+            format!("{}: new chat", model.name).to_string(),
+            model,
+            thread,
+        );
+        let created = {
+            let db = self.db.lock().await;
+            let result = db.create("chat").content(new_chat).await?;
+            db.query("COMMIT TRANSACTION").await?;
+            result
+        };
+        println!("Created chat: {:?}", &created);
+        Ok(created)
+    }
 
-    // pub async fn update_note(
+    pub async fn update_chat_thread(
+        &self,
+        id: String,
+        thread: Vec<ChatMessage>,
+    ) -> Result<Option<Record>, surrealdb::Error> {
+        let updated = {
+            let db = self.db.lock().await;
+            let result = db
+                .update(("chat", id))
+                .patch(PatchOp::add("/thread", thread))
+                .await?;
+            result
+        };
+        println!("Updated chat: {:?}", &updated);
+        Ok(updated)
+    }
+
+    // pub async fn update_chat_title(
     //     &self,
     //     id: String,
     //     title: String,
-    //     content: String
     // ) -> Result<Option<Record>, surrealdb::Error> {
     //     let updated = {
     //         let db = self.db.lock().await;
-    //         let result = db.update(("note", id))
+    //         let result = db
+    //             .update(("chat", id))
     //             .patch(PatchOp::replace("/title", title))
-    //             .patch(PatchOp::replace("/content", content))
     //             .await?;
-    //         db.query("COMMIT TRANSACTION").await?;
     //         result
     //     };
+    //     println!("Updated chat: {:?}", &updated);
     //     Ok(updated)
     // }
 
-    // pub async fn get_note_by_id(
-    //     &self,
-    //     id: String
-    // ) -> Result<Option<NoteRecord>, surrealdb::Error> {
-    //     let note = {
-    //         let db = self.db.lock().await;
-    //         db.query("BEGIN TRANSACTION").await?;
-    //         let result = db.select(("note", id)).await?;
-    //         db.query("COMMIT TRANSACTION").await?;
-    //         result
-    //     };
-    //     Ok(note)
-    // }
+    pub async fn get_chat_by_id(&self, id: String) -> Result<Option<ChatRecord>, surrealdb::Error> {
+        let chat = {
+            let db = self.db.lock().await;
+            db.query("BEGIN TRANSACTION").await?;
+            let result = db.select(("chat", id)).await?;
+            db.query("COMMIT TRANSACTION").await?;
+            result
+        };
+        Ok(chat)
+    }
 
-    // pub async fn get_notes(&self) -> Result<Vec<NoteRecord>, surrealdb::Error> {
-    //     let notes = {
-    //         let db = self.db.lock().await;
-    //         db.query("BEGIN TRANSACTION").await?;
-    //         let result: Vec<NoteRecord> = db.query("SELECT * FROM note").await?.take(0)?;
-    //         db.query("COMMIT TRANSACTION").await?;
-    //         result
-    //     };
-    //     Ok(notes)
-    // }
+    pub async fn get_chats(&self) -> Result<Vec<ChatListItem>, surrealdb::Error> {
+        let chats = {
+            let db = self.db.lock().await;
+            db.query("BEGIN TRANSACTION").await?;
+            let result: Vec<ChatRecord> = db.query("SELECT * FROM chat").await?.take(0)?;
+            db.query("COMMIT TRANSACTION").await?;
+            println!("{:?}", result);
+            result
+                .into_iter()
+                .map(|r| ChatListItem {
+                    id: r.id.key().to_string(),
+                    title: r.title,
+                })
+                .collect()
+        };
+        Ok(chats)
+    }
 
-    // pub async fn delete_note_by_id(&self, id:String) -> Result<(), surrealdb::Error> {
+    // pub async fn delete_chat_by_id(&self, id: String) -> Result<(), surrealdb::Error> {
     //     {
     //         let db = self.db.lock().await;
-    //         let result: Option<Note> = db.delete(("note", id)).await?;
+    //         let result: Option<Chat> = db.delete(("chat", id)).await?;
     //         db.query("COMMIT TRANSACTION").await?;
     //         result
-    //     };
-    //     Ok(())
-    // }
-
-    // pub async fn delete_all_notes(&self) -> Result<(), surrealdb::Error> {
-    //     {
-    //         let db = self.db.lock().await;
-    //         db.query("DELETE note").await?;
-    //         // Ensure the transaction is flushed
-    //         db.query("COMMIT TRANSACTION").await?;
     //     };
     //     Ok(())
     // }

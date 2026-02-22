@@ -1,14 +1,14 @@
 use ollama_rs::generation::completion::request::GenerationRequest;
 use ollama_rs::models::LocalModel;
 use ollama_rs::Ollama;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tauri::Emitter;
 use tauri::Window;
-use tokio::sync::{watch, Mutex};
+use tokio::sync::{watch, Mutex as TokioMutex};
 use tokio_stream::StreamExt;
 
-const SUMMARY_TAMPLATE: &str = "In only 3 lines, tell me what this chat is about: \n";
-const TITLE_TAMPLATE: &str = "In only 3 words, Find a useful title for this chat: \n";
+// const SUMMARY_TAMPLATE: &str = "In only 3 lines, tell me what this chat is about: \n";
+// const TITLE_TAMPLATE: &str = "In only 3 words, Find a useful title for this chat: \n";
 
 #[derive(Default)]
 pub struct StreamControl {
@@ -17,13 +17,51 @@ pub struct StreamControl {
 
 pub struct OllamaController {
     pub ollama: Ollama,
+    pub selected_model: Mutex<Option<LocalModel>>,
+    pub current_conversation_id: Mutex<Option<String>>,
 }
 
 impl OllamaController {
     pub fn new() -> Self {
         Self {
             ollama: Ollama::default(),
+            selected_model: Mutex::new(None),
+            current_conversation_id: Mutex::new(None),
         }
+    }
+
+    pub fn set_selected_model(&self, model: LocalModel) -> Result<(), String> {
+        let mut selected_model = self
+            .selected_model
+            .lock()
+            .map_err(|_| "selected_model mutex poisoned".to_string())?;
+        *selected_model = Some(model);
+        Ok(())
+    }
+
+    pub fn get_selected_model(&self) -> Option<LocalModel> {
+        self.selected_model
+            .lock()
+            .map_err(|_| "selected_model mutex poisoned".to_string())
+            .unwrap()
+            .clone()
+    }
+
+    pub fn set_current_conversation_id(&self, id: String) -> Result<(), String> {
+        let mut current_conversation_id = self
+            .current_conversation_id
+            .lock()
+            .map_err(|_| "current_conversation_id mutex poisoned".to_string())?;
+        *current_conversation_id = Some(id);
+        Ok(())
+    }
+
+    pub fn get_current_conversation_id(&self) -> Option<String> {
+        self.current_conversation_id
+            .lock()
+            .map_err(|_| "current_conversation_id mutex poisoned".to_string())
+            .unwrap()
+            .clone()
     }
 
     pub async fn get_local_llms(&self) -> Result<Vec<LocalModel>, String> {
@@ -36,7 +74,7 @@ impl OllamaController {
     }
 
     pub async fn stop_stream(
-        state: tauri::State<'_, Arc<Mutex<StreamControl>>>,
+        state: tauri::State<'_, Arc<TokioMutex<StreamControl>>>,
     ) -> Result<(), String> {
         let state = state.lock().await;
         if let Some(tx) = &state.stop_sender {
@@ -45,54 +83,56 @@ impl OllamaController {
         Ok(())
     }
 
-    pub async fn give_title_to_chat(
-        &self,
-        model: String,
-        prompt: String,
-    ) -> Result<String, String> {
-        let formatted_prompt = format!("{}{}", TITLE_TAMPLATE, prompt);
-        let res = self
-            .ollama
-            .generate(GenerationRequest::new(model, formatted_prompt))
-            .await
-            .map_err(|e| e.to_string())?;
+    // pub async fn give_title_to_chat(
+    //     &self,
+    //     model: String,
+    //     prompt: String,
+    // ) -> Result<String, String> {
+    //     let formatted_prompt = format!("{}{}", TITLE_TAMPLATE, prompt);
+    //     let res = self
+    //         .ollama
+    //         .generate(GenerationRequest::new(model, formatted_prompt))
+    //         .await
+    //         .map_err(|e| e.to_string())?;
 
-        println!("Title for chat: {:?}", res.response); //TODO: remove after testing
-        Ok(res.response)
-    }
+    //     Ok(res.response)
+    // }
 
-    pub async fn summarise_chat(&self, model: String, prompt: String) -> Result<String, String> {
-        let formatted_prompt = format!("{}{}", SUMMARY_TAMPLATE, prompt);
-        let res = self
-            .ollama
-            .generate(GenerationRequest::new(model, formatted_prompt))
-            .await
-            .map_err(|e| e.to_string())?;
+    // pub async fn summarise_chat(&self, model: String, prompt: String) -> Result<String, String> {
+    //     let formatted_prompt = format!("{}{}", SUMMARY_TAMPLATE, prompt);
+    //     let res = self
+    //         .ollama
+    //         .generate(GenerationRequest::new(model, formatted_prompt))
+    //         .await
+    //         .map_err(|e| e.to_string())?;
 
-        println!("Summarised chat: {:?}", res.response); //TODO: remove after testing
-        Ok(res.response)
-    }
+    //     Ok(res.response)
+    // }
 
     pub async fn ask_ollama(
         &self,
         window: Window,
         prompt: String,
-        model: String,
-        state: tauri::State<'_, Arc<Mutex<StreamControl>>>,
-    ) -> Result<(), String> {
-        let prompt_template = if let Ok(template) = std::env::var("PROMPT_TAMPLATE") {
-            template
-        } else {
-            "".to_string()
-        };
+        state: tauri::State<'_, Arc<TokioMutex<StreamControl>>>,
+    ) -> Result<(LocalModel, String), String> {
+        let selected_model = self.get_selected_model();
 
-        let formatted_prompt = format!("{}{}", prompt, prompt_template);
+        match selected_model {
+            None => return Err("No selected model.".to_string()),
+            Some(model) => self.generate_tokens(window, model, prompt, state).await,
+        }
+    }
 
-        println!("formatted_prompt: {}", formatted_prompt); //TODO: remove after testing
-
+    async fn generate_tokens(
+        &self,
+        window: Window,
+        model: LocalModel,
+        prompt: String,
+        state: tauri::State<'_, Arc<TokioMutex<StreamControl>>>,
+    ) -> Result<(LocalModel, String), String> {
         let mut stream = self
             .ollama
-            .generate_stream(GenerationRequest::new(model, &formatted_prompt))
+            .generate_stream(GenerationRequest::new(model.clone().name, &prompt))
             .await
             .map_err(|e| e.to_string())?;
 
@@ -118,6 +158,6 @@ impl OllamaController {
                 Err(e) => return Err(format!("Error streaming tokens: {}", e)),
             }
         }
-        Ok(())
+        Ok((model, ollama_response))
     }
 }
