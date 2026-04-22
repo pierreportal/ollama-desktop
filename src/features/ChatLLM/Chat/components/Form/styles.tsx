@@ -9,7 +9,10 @@ export const FormContainer = styled.form`
     width: 600px;
     position: relative;
 
-    & > input {
+    & > textarea {
+        color: inherit;
+        font-size: inherit;
+        outline: none;
         margin: 0;
         padding: 10px;
         border-radius: 30px;
@@ -18,6 +21,8 @@ export const FormContainer = styled.form`
         height: 100px;
         border: none;
         background-color: #444;
+        resize: none;
+        align-content: center;
     }
 
     & button {

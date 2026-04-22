@@ -4,18 +4,47 @@ import { DotLoader } from "./components/DotLoader";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { tomorrow } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { FiCopy, FiRefreshCcw } from "react-icons/fi";
-import { Row } from "../../../../../UIKit";
+import {
+  tomorrow,
+} from "react-syntax-highlighter/dist/cjs/styles/prism";
+//import { FiCopy, FiRefreshCcw } from "react-icons/fi";
+//import { Row } from "../../../../../UIKit";
 import { Message, MESSAGE_SENDER } from "../../../../../bindings";
 import React from "react";
+import { useEffect } from "react";
+import { open } from "@tauri-apps/plugin-shell";
+
 
 interface IProps {
   stream: Array<Message>;
   isLoading: boolean;
 }
+export function useExternalLinks() {
+  useEffect(() => {
+    const handler = async (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest("a");
 
+      if (!target) return;
+
+      const href = target.getAttribute("href");
+      if (!href) return;
+
+      // only handle external links
+      if (href.startsWith("http")) {
+        e.preventDefault();
+        await open(href);
+      }
+    };
+
+    document.addEventListener("click", handler);
+
+    return () => {
+      document.removeEventListener("click", handler);
+    };
+  }, []);
+}
 export const ChatStream = ({ stream, isLoading }: IProps) => {
+  useExternalLinks();
   const items = stream
     .filter((x) => x.content)
     .map((item, index) => {
@@ -35,6 +64,9 @@ export const ChatStream = ({ stream, isLoading }: IProps) => {
 
                   return !inline && match ? (
                     <SyntaxHighlighter
+                      customStyle={{
+                        borderRadius: 10,
+                      }}
                       style={tomorrow}
                       PreTag="div"
                       language={match[1]}
@@ -53,12 +85,13 @@ export const ChatStream = ({ stream, isLoading }: IProps) => {
               {item.content}
             </Markdown>
           </div>
+          {/*
           <Row $gap={10}>
-            {/* TODO: implement copy to clipboard */}
             <FiCopy />
-            {/* TODO: implement refresh query */}
+            TODO: implement refresh query 
             <FiRefreshCcw />
           </Row>
+            */}
         </React.Fragment>
       );
     });

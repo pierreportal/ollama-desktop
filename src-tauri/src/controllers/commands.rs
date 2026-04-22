@@ -20,3 +20,11 @@ pub async fn get_chat_by_id(
         Err(e) => Err(e.to_string()),
     }
 }
+
+#[tauri::command]
+pub async fn delete_chat_by_id(db: State<'_, Database>, id: String) -> Result<(), String> {
+    match db.delete_chat_by_id(id).await {
+        Ok(()) => Ok(()),
+        Err(e) => Err(e.to_string()),
+    }
+}

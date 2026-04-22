@@ -13,11 +13,11 @@
     "windows": [
       {
         "title": "🦙 Ollama desktop",
-        "width": 1300,
+        "width": 1400,
         "height": 1000,
-        "transparent": true,
         "resizable": true,
-        "fullscreen": false
+        "fullscreen": false,
+        "backgroundColor": "#222"
       }
     ],
     "security": {

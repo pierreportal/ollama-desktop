@@ -20,16 +20,16 @@ export const Form = ({ onSubmit, onInterupt, isCompleting }: IProps) => {
     onSubmit({ content: prompt, from: MESSAGE_SENDER.USER });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.currentTarget.value);
   };
 
   return (
     <FormContainer onSubmit={handleSubmit}>
-      <input
+      <textarea
         value={prompt}
-        onChange={handleChange}
         placeholder="Ask me something..."
+        onChange={handleChange}
       />
       <Column $gap={10}>
         {isCompleting ? (

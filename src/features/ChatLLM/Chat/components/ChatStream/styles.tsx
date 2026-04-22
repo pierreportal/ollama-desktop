@@ -19,18 +19,6 @@ export const Bubble = styled.div<IProps>`
   margin: 10px;
   align-self: ${({ $isUser }) => ($isUser ? "flex-end" : "flex-start")};
   word-wrap: break-word;
-
-  & a {
-    color: rgb(58, 255, 210);
-    text-decoration: none;
-  }
-
-  & pre {
-    font-size: 14px;
-
-    & > div {
-      border-radius: 10px;
-    }
   }
 `;
 
@@ -41,24 +29,20 @@ export const Thread = styled.div`
   overflow-y: scroll;
   height: 100%;
   padding: 0 20px;
-
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 5px;
-  }
 `;
 
 export const ThreadInner = styled.div`
-  width: 800px;
+  font-family: "Geist", sans-serif;
+  font-optical-sizing: auto;
+  width: 850px;
   justify-self: center;
   margin: 0 auto;
   padding: 0 20px;
   flex-direction: column;
   display: flex;
+  & h1 {
+    line-height: 1;
+  }
 `;
 
 export const Placeholder = styled.div`

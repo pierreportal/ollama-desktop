@@ -6,6 +6,7 @@ const SELECT_MODEL = "select_model";
 const GET_LOCAL_LLMS = "get_local_llms";
 const GET_CHATS = "get_chats";
 const GET_CHAT_BY_ID = "get_chat_by_id";
+const DELETE_CHAT_BY_ID = "delete_chat_by_id";
 
 const askOllama = async (
   chatId: string | null,
@@ -57,10 +58,20 @@ const getChatById = async (id: string): Promise<Chat | undefined> => {
   }
 };
 
+const deleteChatById = async (id: string): Promise<any> => {
+  try {
+    await invoke(DELETE_CHAT_BY_ID, { id });
+    return;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export const invokeOllama = {
   askOllama,
   getChats,
   getChatById,
   selectModel,
   getLocalLLMs,
+  deleteChatById,
 };
